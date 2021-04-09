@@ -24,6 +24,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.MediaController;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
@@ -36,9 +37,11 @@ import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.bumptech.glide.Glide;
 import com.example.digitalsop.Config.DBHelper;
 import com.example.digitalsop.Util.ImageLoader;
 import com.github.barteksc.pdfviewer.PDFView;
+import com.github.barteksc.pdfviewer.listener.OnRenderListener;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
@@ -46,6 +49,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -83,7 +87,9 @@ int i=0;
     ImageView image,image1;
     ProgressDialog mProgressDialog;
 
-   LinearLayout lin,lin1;
+   LinearLayout lin;
+    LinearLayout lin1;
+    RelativeLayout rel,rel1,rel2;
     private RequestQueue mRequestQueue;
     private StringRequest mStringRequest;
     JSONObject resultJsonObject;
@@ -93,6 +99,7 @@ int i=0;
         super.onCreate(savedInstanceState);
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                     WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_main);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         videoView = findViewById(R.id.videoview);
@@ -117,6 +124,9 @@ int i=0;
         //lineralayout
         lin=findViewById(R.id.lin);
         lin1=findViewById(R.id.lin1);
+        rel=findViewById(R.id.rel);
+        rel1=findViewById(R.id.rel1);
+        rel2=findViewById(R.id.rel2);
 
        lin1.setVisibility(View.GONE);
 
@@ -156,15 +166,7 @@ int i=0;
             InputStream inputStream = null;
             try {
                 URL url = new URL(strings[0]);
-                // below is the step where we are
-                // creating our connection.
-                HttpURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
-                if (urlConnection.getResponseCode() == 200) {
-                    // response is success.
-                    // we are getting input stream from url
-                    // and storing it in our variable.
-                    inputStream = new BufferedInputStream(urlConnection.getInputStream());
-                }
+                inputStream = new URL(strings[0]).openStream();
 
             } catch (IOException e) {
                 // this is the method
@@ -178,8 +180,18 @@ int i=0;
         @Override
         protected void onPostExecute(InputStream inputStream) {
             // after the execution of our async
-            // task we are loading our pdf in our pdf view.
-            pdfView1.fromStream(inputStream).load();
+            // task we are loading our pdf in our pdf view.x
+            pdfView1.fromStream(inputStream).onRender(new OnRenderListener()
+            {
+                @Override
+                public void onInitiallyRendered(int nbPages, float pageWidth, float pageHeight)
+                {
+                    pdfView1.fitToWidth(nbPages);
+                }
+            }).load();
+            pdfView1.getZoom();
+//             pdfView1.fitToWidth();
+
 //            pdfView1.fromStream(inputStream).load();
         }
     }
@@ -192,15 +204,7 @@ int i=0;
             InputStream inputStream = null;
             try {
                 URL url = new URL(strings[0]);
-                // below is the step where we are
-                // creating our connection.
-                HttpURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
-                if (urlConnection.getResponseCode() == 200) {
-                    // response is success.
-                    // we are getting input stream from url
-                    // and storing it in our variable.
-                    inputStream = new BufferedInputStream(urlConnection.getInputStream());
-                }
+                inputStream = new URL(strings[0]).openStream();
 
             } catch (IOException e) {
                 // this is the method
@@ -283,22 +287,33 @@ int i=0;
         pdfView.setVisibility(View.GONE);
         image.setVisibility(View.GONE);
         String finalUrl = dataurl;
-        videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-       @Override
-       public void onCompletion(MediaPlayer mp) {
-//        Toast.makeText(getApplicationContext(), "Video over", Toast.LENGTH_SHORT).show();
-        if (index++ == arrayList.size()) {
-        index = 0;
-        mp.release();
-//        Toast.makeText(getApplicationContext(), "Video over", Toast.LENGTH_SHORT).show();
-        } else {
-        videoView.setVideoURI(Uri.parse(""+ finalUrl));
-        videoView.start();
-        }
-
-
-        }
-        });
+//        videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+//       @Override
+//       public void onCompletion(MediaPlayer mp) {
+////        Toast.makeText(getApplicationContext(), "Video over", Toast.LENGTH_SHORT).show();
+//           String finalUrl = dataurl;
+//        if (index++ == arrayList.size()) {
+//        index = 0;
+//      mp.setScreenOnWhilePlaying(true);
+//        mp.release();
+//
+////        Toast.makeText(getApplicationContext(), "Video over", Toast.LENGTH_SHORT).show();
+//        } else {
+//            Log.e("finalUrl",""+finalUrl);
+//        videoView.setVideoURI(Uri.parse(""+ finalUrl));
+//        videoView.start();
+//
+//        }
+//
+//
+//        }
+//        });
+            videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mp) {
+                    mp.setLooping(true);
+                }
+            });
 
 //        videoView.setOnErrorListener(new MediaPlayer.OnErrorListener() {
 //    @Override
@@ -354,24 +369,14 @@ int i=0;
                 videoView1.setVideoURI(Uri.parse(""+dataurl));
                 videoView1.requestFocus();
                 videoView1.start();
-                videoView1.setVisibility(View.VISIBLE);
-                pdfView1.setVisibility(View.VISIBLE);
-                image1.setVisibility(View.GONE);
+                rel.setVisibility(View.VISIBLE);
+                rel1.setVisibility(View.VISIBLE);
+                rel2.setVisibility(View.GONE);
                 String finalUrl = dataurl;
-                videoView1.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                videoView1.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                     @Override
-                    public void onCompletion(MediaPlayer mp) {
-//        Toast.makeText(getApplicationContext(), "Video over", Toast.LENGTH_SHORT).show();
-                        if (index++ == arrayList.size()) {
-                            index = 0;
-                            mp.release();
-//        Toast.makeText(getApplicationContext(), "Video over", Toast.LENGTH_SHORT).show();
-                        } else {
-                            videoView1.setVideoURI(Uri.parse(""+ finalUrl));
-                            videoView1.start();
-                        }
-
-
+                    public void onPrepared(MediaPlayer mp) {
+                        mp.setLooping(true);
                     }
                 });
 
@@ -391,35 +396,27 @@ int i=0;
                 new RetrivePDFfromUrl1().execute(dataurl);
                 Picasso.with(getApplicationContext()).load(dataurl1).into(image1);
 
-                videoView1.setVisibility(View.GONE);
-                pdfView1.setVisibility(View.VISIBLE);
-                image1.setVisibility(View.VISIBLE);
+                rel.setVisibility(View.GONE);
+                rel1.setVisibility(View.VISIBLE);
+                rel2.setVisibility(View.VISIBLE);
             }
             else if(content_type.equals("1")){
+
+//
                 final MediaController mediacontroller = new MediaController(MainActivity.this);
                 mediacontroller.setAnchorView(videoView1);
                 videoView1.setMediaController(mediacontroller);
                 videoView1.setVideoURI(Uri.parse(""+dataurl));
                 videoView1.requestFocus();
                 videoView1.start();
-                videoView1.setVisibility(View.VISIBLE);
-                pdfView1.setVisibility(View.GONE);
-                image1.setVisibility(View.VISIBLE);
-                String finalUrl = dataurl;
-                videoView1.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                rel.setVisibility(View.VISIBLE);
+                rel1.setVisibility(View.GONE);
+                rel2.setVisibility(View.VISIBLE);
+//                String finalUrl = dataurl;
+                videoView1.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                     @Override
-                    public void onCompletion(MediaPlayer mp) {
-//        Toast.makeText(getApplicationContext(), "Video over", Toast.LENGTH_SHORT).show();
-                        if (index++ == arrayList.size()) {
-                            index = 0;
-                            mp.release();
-//        Toast.makeText(getApplicationContext(), "Video over", Toast.LENGTH_SHORT).show();
-                        } else {
-                            videoView1.setVideoURI(Uri.parse(""+ finalUrl));
-                            videoView1.start();
-                        }
-
-
+                    public void onPrepared(MediaPlayer mp) {
+                        mp.setLooping(true);
                     }
                 });
 
@@ -431,9 +428,10 @@ int i=0;
                     }
                 });
 //                new RetrivePDFfromUrl1().execute(dataurl1);
-                Picasso.with(getApplicationContext()).load(dataurl1).into(image1);
 
 
+//                Picasso.with(getApplicationContext()).load(dataurl1).into(image1);
+                Glide.with(getApplicationContext()).load(dataurl1).into(image1);
             }
 
 
@@ -489,6 +487,7 @@ int i=0;
                         Log.e("last_update",""+last_update);
 
                         last_update=last_update_new;
+//                        clearApplicationData();
                         sendAndRequestResponse();
 //                        Toast.makeText(MainActivity.this, "MainActivity", Toast.LENGTH_SHORT).show();
 
@@ -543,6 +542,35 @@ int i=0;
         }
         return  "0";
     }
+
+
+//    public void clearApplicationData() {
+//        File cache = getCacheDir();
+//        File appDir = new File(cache.getParent());
+//        if(appDir.exists()){
+//            String[] children = appDir.list();
+//            for(String s : children){
+//                if(!s.equals("lib")){
+//                    deleteDir(new File(appDir, s));
+//                    Log.i("TAG", "File /data/data/APP_PACKAGE/" + s +" DELETED");
+//                }
+//            }
+//        }
+//    }
+//
+//    public static boolean deleteDir(File dir) {
+//        if (dir != null && dir.isDirectory()) {
+//            String[] children = dir.list();
+//            for (int i = 0; i < children.length; i++) {
+//                boolean success = deleteDir(new File(dir, children[i]));
+//                if (!success) {
+//                    return false;
+//                }
+//            }
+//        }
+//
+//        return dir.delete();
+//    }
 }
 
 

@@ -9,29 +9,21 @@
     tools:context=".MainActivity">
 
     <!--VideoView-->
-    <VideoView
-        android:id="@+id/videoview"
-        android:layout_width="0dp"
-        android:layout_height="fill_parent"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_weight="1"
-        app:layout_constraintDimensionRatio="4:3"
 
-        />
+
+
     <!--screen-->
     <LinearLayout
     android:layout_width="match_parent"
     android:id="@+id/lin"
     android:layout_height="match_parent"
-    android:layout_alignParentTop="true"
-    android:layout_alignParentBottom="true"
-    android:layout_alignParentLeft="true"
-    android:layout_alignParentRight="true"
+  android:gravity="center_horizontal"
     android:orientation="horizontal">
-
+        <VideoView
+            android:id="@+id/videoview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_constraintDimensionRatio="4:3"/>
     <!--PDF Viewer to display our PDF-->
     <com.github.barteksc.pdfviewer.PDFView
         android:id="@+id/idPDFView"
@@ -54,35 +46,64 @@
 
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
             android:id="@+id/lin1"
             android:visibility="gone"
             android:weightSum="2"
-            android:orientation="horizontal">
+          >
+
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:background="@color/green"
+                android:layout_height="wrap_content"
+                android:id="@+id/rel"
+                android:layout_weight="1">
             <VideoView
                 android:id="@+id/videoview1"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentBottom="true"
                 android:layout_height="match_parent"
-                app:layout_constraintDimensionRatio="4:3"
-                android:layout_weight="1"
-               />
+                />
+            </RelativeLayout>
+
+
             <!--PDF Viewer to display our PDF-->
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:background="@color/green"
+                android:id="@+id/rel1"
+                android:layout_height="wrap_content"
+                android:layout_weight="1">
             <com.github.barteksc.pdfviewer.PDFView
                 android:id="@+id/idPDFView1"
-                android:layout_weight="1"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent" />
+            </RelativeLayout>
 
+
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:background="@color/green"
+                android:id="@+id/rel2"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
             <ImageView
                 android:id="@+id/image1"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:layout_width="0dp"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentBottom="true"
+                android:scaleType="fitXY"
+                android:layout_width="match_parent"
                 />
+            </RelativeLayout>
+
         </LinearLayout>
-
-
 
 
 
